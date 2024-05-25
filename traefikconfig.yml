@@ -1,4 +1,4 @@
-retire os dados sensiveis api:
+api:
   dashboard: true
   insecure: true
 entryPoints:
