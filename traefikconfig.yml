@@ -21,10 +21,10 @@ providers:
 certificatesResolvers:
   cloudflare:
     acme:
-      email: [SEU_ENDEREÇO_DE_EMAIL]
+      email:
       storage: /data/acme.json
       #caServer: https://acme-v02.api.letsencrypt.org/directory #Production
-      caServer: https://acme-staging-v02.api.letsencrypt.org/directory #Staging
+      #caServer: https://acme-staging-v02.api.letsencrypt.org/directory #Staging
       dnsChallenge:
         provider: cloudflare
         resolvers:
