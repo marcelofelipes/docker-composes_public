@@ -13,8 +13,6 @@ services:
       CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN} # use direct assignment for environment variables
       TRAEFIK_DASHBOARD_CREDENTIALS: ${TRAEFIK_DASHBOARD_CREDENTIALS}
       TRAEFIK_HOSTNAME: ${TRAEFIK_HOSTNAME} # use the environment variable
-    secrets:
-      - cf_api_token
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -34,11 +32,6 @@ services:
       - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
       - "traefik.http.routers.traefik-secure.tls.domains[0].main=${TRAEFIK_HOSTNAME}" # use the variable here
       - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.${TRAEFIK_HOSTNAME}" # use the variable here
-
-secrets:
-  cf_api_token:
-    file: ./data/cf_api_token.txt
-
 networks:
   proxy:
     external: true
