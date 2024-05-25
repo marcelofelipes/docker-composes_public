@@ -1,0 +1,44 @@
+version: "3.7"
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:latest # specify a version to ensure stability
+    restart: unless-stopped
+    networks:
+      - proxy
+    ports:
+      - "80:80" # use quotes for consistency
+      - "443:443"
+    environment:
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN} # use direct assignment for environment variables
+      TRAEFIK_DASHBOARD_CREDENTIALS: ${TRAEFIK_DASHBOARD_CREDENTIALS}
+      TRAEFIK_HOSTNAME: ${TRAEFIK_HOSTNAME} # use the environment variable
+    secrets:
+      - cf_api_token
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data:/data
+      - ./data/traefik.yml:/traefik.yml:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`${TRAEFIK_HOSTNAME}`)" # use the variable here
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.middlewares=traefik-auth, traefik-https-redirect"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_DASHBOARD_CREDENTIALS}"
+      - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.sslheaders.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.services.traefik-secure.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik-secure.service=traefik-secure"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main=${TRAEFIK_HOSTNAME}" # use the variable here
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.${TRAEFIK_HOSTNAME}" # use the variable here
+
+secrets:
+  cf_api_token:
+    file: ./data/cf_api_token.txt
+
+networks:
+  proxy:
+    external: true
